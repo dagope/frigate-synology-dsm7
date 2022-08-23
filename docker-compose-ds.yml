@@ -1,0 +1,24 @@
+services:
+  frigate:
+    image: "ghcr.io/weltenwort/frigate-synology-dsm7:v0.11.0-rc1"
+    privileged: true
+    hostname: "frigate"
+    restart: "unless-stopped"
+    shm_size: "64mb"
+    devices:
+      - "/dev/dri/renderD128" # for intel hwaccel
+    volumes:
+      - "/dev/bus/usb:/dev/bus/usb"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/volume1/docker/volumes/frigate-0-config/config.yml:/config/config.yml:ro"
+      - "/volume1/docker/volumes/frigate-0-media:/media/frigate:rw"
+      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+    ports:
+      - "8001:5000" # web interface
+      - "1935:1935" # RTMP feeds
+    environment:
+      - LIBVA_DRIVER_NAME_JELLYFIN=i965 # if hwacl isn't working properly with the defaul iHD driver
+      - FRIGATE_RTSP_PASSWORD=frigate.pass
